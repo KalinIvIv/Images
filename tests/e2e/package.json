@@ -1,0 +1,7 @@
+{
+  "name": "photocut-e2e",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node run_e2e.mjs" },
+  "devDependencies": { "playwright": "1.56.1" }
+}

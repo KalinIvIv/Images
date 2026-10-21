@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "note": "Starter rules shipped with the extension. A rule in the team's shared rules.json for the same domain replaces these.",
+  "sites": {
+    "lg.com": {
+      "exclude": ["/awards/", "/award/", "energy-label", "energylabel", "/icons/", "/logo"],
+      "minSize": 500,
+      "note": "Applies to every LG localisation (/za/, /uk/, /de/...). Not yet verified on a live page: if the gallery is wrong, use Pick gallery area once and the team rule will replace this."
+    },
+    "aoc.com": {
+      "exclude": ["/awards/", "/logo", "/icons/", "energy-label"],
+      "minSize": 500,
+      "note": "Not yet verified on a live page."
+    },
+    "panzerglass.com": {
+      "note": "Shopify store: product images come from /products/<handle>.js in full resolution."
+    }
+  }
+}

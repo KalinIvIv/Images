@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>PhotoCut</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <strong>PhotoCut</strong>
+    <span id="site" class="muted"></span>
+    <a id="options" href="#" title="Settings">⚙</a>
+  </header>
+
+  <div id="message" class="message" hidden></div>
+
+  <section id="main" hidden>
+    <label for="folder">Folder name</label>
+    <div class="row">
+      <input id="folder" type="text" spellcheck="false" autocomplete="off">
+      <button id="save" class="primary">Save</button>
+    </div>
+    <div id="name-hints" class="hints"></div>
+    <div id="folder-status" class="muted small"></div>
+    <label id="new-folder-wrap" class="check small" hidden><input id="new-folder" type="checkbox"> Create a new folder instead</label>
+
+    <div id="rule-status" class="rule small"></div>
+    <div id="warnings"></div>
+
+    <div class="toolbar">
+      <button id="pick">Pick gallery area</button>
+      <button id="all" class="link">Select all</button>
+      <button id="none" class="link">None</button>
+      <span id="count" class="muted small"></span>
+    </div>
+
+    <div id="grid-gallery" class="grid"></div>
+    <div id="others-title" class="divider" hidden>Other large images on the page</div>
+    <div id="grid-others" class="grid"></div>
+
+    <label id="remember-wrap" class="check remember" hidden>
+      <input id="remember" type="checkbox" checked>
+      <span>Remember these choices for <b id="remember-domain"></b> (shared with the team)</span>
+    </label>
+  </section>
+
+  <section id="job" hidden>
+    <div id="job-title"></div>
+    <progress id="job-progress" max="1" value="0"></progress>
+    <div id="job-detail" class="muted small"></div>
+    <ul id="job-errors" class="errors"></ul>
+    <div class="row">
+      <button id="open-folder">Open folder</button>
+      <button id="again" class="link">Back</button>
+    </div>
+  </section>
+
+  <script src="popup.js"></script>
+</body>
+</html>

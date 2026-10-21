@@ -1,0 +1,71 @@
+================================================================================
+                        IMAGE AUTO-CROPPER - HOW TO USE
+================================================================================
+
+WHAT IT DOES:
+- Automatically crops product images
+- Removes backgrounds and shadows
+- Keeps only the main object
+- Saves as PNG files in an 'output' folder
+- All images are resized to fit 650x650 to 3000x3000 pixels
+- File size kept under 5MB
+
+--------------------------------------------------------------------------------
+HOW TO USE:
+--------------------------------------------------------------------------------
+
+FIRST TIME:
+1. Double-click ImageAutoCropper.exe
+2. Select the folder containing your product images
+3. Wait for processing to complete
+4. Success message will appear and auto-close after 5 seconds
+5. Find processed images in the 'output' subfolder
+
+EVERY TIME AFTER:
+1. Double-click ImageAutoCropper.exe
+2. It will automatically process images in your saved folder
+3. Done! Check the 'output' folder for results
+
+--------------------------------------------------------------------------------
+TO CHANGE YOUR IMAGE FOLDER:
+--------------------------------------------------------------------------------
+
+Option 1: Delete the config.json file and run the program again
+Option 2: Edit config.json and change the folder path
+
+Example config.json:
+{
+  "folder_path": "C:\\Users\\YourName\\Pictures\\ProductPhotos"
+}
+
+Note: Use double backslashes (\\) in the path!
+
+--------------------------------------------------------------------------------
+TROUBLESHOOTING:
+--------------------------------------------------------------------------------
+
+Q: The program isn't finding my images
+A: Make sure your images are .jpg, .png, .webp, .bmp, or .tiff files
+
+Q: I want to change the folder
+A: Delete config.json and run the program again
+
+Q: The cropping is too aggressive or not enough
+A: Contact your IT admin to adjust the alpha_threshold setting
+
+Q: Where are my processed images?
+A: In the 'output' subfolder inside your selected folder
+
+Q: The success message disappeared too fast
+A: Check the 'output' folder - if files are there, it worked!
+
+--------------------------------------------------------------------------------
+NOTES:
+--------------------------------------------------------------------------------
+
+- All output images are saved as PNG format
+- Original images are NOT modified
+- The program removes soft shadows and keeps only the main object
+- Images are automatically scaled to meet size requirements
+
+================================================================================

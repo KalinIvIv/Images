@@ -1,5 +1,7 @@
 # Image Auto-Cropper — Code Notes
 
+> These notes describe the original folder-based tool, now kept in [`legacy/`](legacy/). Its replacement, PhotoCut (see [README.md](README.md)), fixes the problems listed in sections 5–7.
+
 Notes on the 9 project files: what each one does, how they work together, and where the code and the docs disagree.
 
 ## 1. The big picture

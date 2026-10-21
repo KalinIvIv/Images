@@ -1,0 +1,95 @@
+:root {
+  --bg: #ffffff;
+  --fg: #111827;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --card: #f9fafb;
+  --accent: #2563eb;
+  --accent-fg: #ffffff;
+  --ok: #15803d;
+  --warn-bg: #fffbeb;
+  --warn-fg: #92400e;
+  --err-bg: #fef2f2;
+  --err-fg: #991b1b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111827;
+    --fg: #f3f4f6;
+    --muted: #9ca3af;
+    --line: #374151;
+    --card: #1f2937;
+    --accent: #3b82f6;
+    --warn-bg: #3b2f0b;
+    --warn-fg: #fcd34d;
+    --err-bg: #3f1d1d;
+    --err-fg: #fca5a5;
+  }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  width: 560px;
+  max-height: 590px;
+  background: var(--bg);
+  color: var(--fg);
+  font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-bottom: 1px solid var(--line);
+}
+header #options { margin-left: auto; color: var(--muted); text-decoration: none; font-size: 16px; }
+section { padding: 12px 14px; }
+label { display: block; font-weight: 600; margin-bottom: 4px; }
+.row { display: flex; gap: 8px; align-items: center; }
+input[type="text"] {
+  flex: 1; padding: 7px 9px; font: inherit; color: var(--fg); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 6px;
+}
+input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+button {
+  font: inherit; padding: 6px 12px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--card); color: var(--fg);
+}
+button.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; min-width: 110px; }
+button.primary:disabled { opacity: .5; cursor: default; }
+button.link { border: none; background: none; color: var(--accent); padding: 4px 6px; }
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+.hints { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 2px; }
+.hints button { padding: 1px 8px; font-size: 11px; border-radius: 10px; color: var(--muted); }
+.check { display: flex; gap: 6px; align-items: center; font-weight: normal; margin: 4px 0 0; }
+.rule { margin-top: 10px; padding: 6px 8px; border-radius: 6px; background: var(--card); }
+.message, .warning { margin: 8px 14px 0; padding: 8px 10px; border-radius: 6px; background: var(--warn-bg); color: var(--warn-fg); }
+#warnings .warning { margin: 8px 0 0; }
+.message.error { background: var(--err-bg); color: var(--err-fg); }
+.message code { font-size: 11px; }
+.toolbar { display: flex; align-items: center; gap: 4px; margin: 12px 0 8px; }
+.toolbar #count { margin-left: auto; }
+.grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.card {
+  position: relative; border: 2px solid var(--line); border-radius: 8px; background: #fff;
+  aspect-ratio: 1; cursor: pointer; overflow: hidden;
+}
+.card img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.card .size {
+  position: absolute; left: 0; right: 0; bottom: 0; font-size: 10px; padding: 1px 4px;
+  background: rgba(17, 24, 39, .7); color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.card .tick {
+  position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid #fff; background: rgba(17, 24, 39, .35); box-shadow: 0 0 2px rgba(0, 0, 0, .5);
+}
+.card.on { border-color: var(--accent); }
+.card.on .tick { background: var(--accent); }
+.card.on .tick::after { content: "✓"; color: #fff; font-size: 11px; position: absolute; inset: 0; text-align: center; line-height: 14px; }
+.card:not(.on) img { opacity: .45; }
+.divider { margin: 14px 0 8px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--line); padding-top: 8px; }
+.remember { margin-top: 14px; padding: 8px; border-radius: 6px; background: var(--card); }
+#job progress { width: 100%; height: 10px; margin: 10px 0 6px; }
+#job-title { font-weight: 600; font-size: 14px; }
+.errors { color: var(--err-fg); font-size: 12px; padding-left: 18px; max-height: 160px; overflow: auto; }
+.errors:empty { display: none; }

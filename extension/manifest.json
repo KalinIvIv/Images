@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "PhotoCut",
+  "version": "1.0.0",
+  "description": "Grab the product images from the current page, crop them and save them to a folder.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxZ3XlnfkoBcjZ/acgRGGdlgOEjdxXtcbwquX4VQHjVctWsE40o/kSCXFDxX07uoBM+MHIvY6liK+cm19wB+A19bOUyfxkdLWGsYtFa7DKxOGxPqtwO6m1NUVvlE0+MAFhGPw1aHpHaLqmPE6pvShjhei/98NHgsWbGWlBwF8n93oTVcx3z8oIEtEhTtew0T5huf9OLJWb4jvgiXXq+OrFwx92N83wZsRPa2cOcg5xynhTfGbXqYYA1YDNwQJm0KdiNSTpkq7v8rRiZvLlEt8dcmhS1xUzhTRYPQiRMRPvsG6FeN0POxAM1tVZwJEtg/SHqU5VbfzBHN1M+jwdMLnUQIDAQAB",
+  "minimum_chrome_version": "116",
+  "permissions": ["activeTab", "scripting", "nativeMessaging", "storage", "declarativeNetRequestWithHostAccess"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js" },
+  "action": {
+    "default_title": "PhotoCut: save product images",
+    "default_popup": "popup.html",
+    "default_icon": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png" }
+  },
+  "icons": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png" },
+  "options_page": "options.html",
+  "commands": {
+    "_execute_action": { "suggested_key": { "default": "Alt+Shift+S" } }
+  }
+}

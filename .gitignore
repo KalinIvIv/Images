@@ -1,0 +1,9 @@
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+build/
+dist/
+*.spec
+!legacy/*.spec
+release/

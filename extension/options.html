@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>PhotoCut settings</title>
+  <link rel="stylesheet" href="popup.css">
+  <style>
+    body { width: auto; max-width: 680px; max-height: none; margin: 0 auto; padding: 16px; }
+    .field { margin: 18px 0; }
+    .help { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .help code { font-size: 12px; }
+    #status { margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <h2>PhotoCut settings</h2>
+  <div id="conn" class="message" hidden></div>
+
+  <div class="field">
+    <label for="base_folder">Output folder</label>
+    <div class="row"><input id="base_folder" type="text"><button data-browse="base_folder" data-kind="folder">Browse…</button></div>
+    <div class="help">Each save creates <code>&lt;this folder&gt;\&lt;folder name&gt;\&lt;folder name&gt;_1.png …</code></div>
+  </div>
+
+  <div class="field">
+    <label for="rules_path">Shared site rules file</label>
+    <div class="row"><input id="rules_path" type="text" placeholder="G:\My Drive\PhotoCut\rules.json"><button data-browse="rules_path" data-kind="file">Browse…</button></div>
+    <div class="help">
+      Use a folder everyone on the team has on their PC, for example a Google Drive folder through
+      <b>Google Drive for desktop</b> (it appears as a drive like <code>G:\My Drive\…</code> or <code>G:\Shared drives\…</code>).
+      A drive.google.com web link does not work here. The file is created on the first saved rule.
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="user_name">Your name</label>
+    <input id="user_name" type="text">
+    <div class="help">Shown next to the site rules you save.</div>
+  </div>
+
+  <div class="field">
+    <label class="check"><input id="open_folder" type="checkbox"> Open the folder when saving is done</label>
+    <label class="check"><input id="flatten" type="checkbox"> Put transparent images on a white background</label>
+  </div>
+
+  <div class="field">
+    <label for="tolerance">Crop sensitivity (background colour tolerance)</label>
+    <input id="tolerance" type="number" min="1" max="120" style="width:90px">
+    <div class="help">Default 30. Lower crops closer to faint shadows; higher ignores more of the background.</div>
+  </div>
+
+  <button id="save" class="primary">Save settings</button>
+  <div id="status" class="small"></div>
+
+  <script src="options.js"></script>
+</body>
+</html>
