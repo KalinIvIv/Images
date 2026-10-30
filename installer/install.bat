@@ -3,6 +3,20 @@ REM Installs PhotoCut for the current Windows user (no admin rights needed).
 setlocal
 set "DEST=%LOCALAPPDATA%\PhotoCut"
 
+if not exist "%~dp0app\PhotoCut.exe" (
+    echo.
+    echo Cannot find app\PhotoCut.exe next to this install.bat:
+    echo     %~dp0
+    echo.
+    echo  - If you opened install.bat from inside PhotoCut.zip, close this window,
+    echo    right-click PhotoCut.zip, choose "Extract All...", then run install.bat
+    echo    from the extracted folder.
+    echo  - Do not run the install.bat in the source code's "installer" folder;
+    echo    use the one from release\PhotoCut.zip made by build.bat.
+    pause
+    exit /b 1
+)
+
 echo Installing PhotoCut to %DEST% ...
 if exist "%DEST%\app" rmdir /s /q "%DEST%\app"
 xcopy /e /i /q /y "%~dp0app" "%DEST%\app" >nul || goto :fail
