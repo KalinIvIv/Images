@@ -201,6 +201,16 @@ try {
     await page.close();
   }
 
+  // --- 3c. The local app is closed when idle (so install.bat can replace it) ---------
+  {
+    const running = () => {
+      try { return execFileSync('pgrep', ['-f', 'photocut chrome-extension://'], { encoding: 'utf-8' }).trim().split('\n').filter(Boolean).length; } catch { return 0; }
+    };
+    const before = running();
+    await new Promise((r) => setTimeout(r, 33000));
+    check(before > 0 && running() === 0, `idle: local app was running (${before}) and closed itself after 30 s idle (${running()})`);
+  }
+
   // --- 4. Output files are correct -------------------------------------------------------
   {
     const info = py(['-c', `

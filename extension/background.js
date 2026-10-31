@@ -5,19 +5,36 @@
 const HOST = 'com.photocut.host';
 const DOWNLOAD_CONCURRENCY = 6;
 const REFERER_RULE_ID = 1;
+// Close the local app when it's not needed, so it doesn't keep running in the background
+// (a running PhotoCut.exe can't be replaced by install.bat when updating).
+const IDLE_DISCONNECT_MS = 30_000;
 
 let port = null;
+let idleTimer = null;
 let nextId = 1;
 const pending = new Map();   // request id -> {resolve, reject}
 const jobs = new Map();      // jobId -> {tabId, resolve}
+
+function scheduleIdleDisconnect() {
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    if (port && !pending.size && !jobs.size) {
+      const p = port;
+      port = null;
+      p.disconnect();  // Chrome then ends PhotoCut.exe
+    }
+  }, IDLE_DISCONNECT_MS);
+}
 
 function connect() {
   if (port) return port;
   port = chrome.runtime.connectNative(HOST);
   port.onMessage.addListener(onHostMessage);
+  scheduleIdleDisconnect();
   port.onDisconnect.addListener(() => {
     const error = chrome.runtime.lastError?.message || 'PhotoCut app disconnected';
     port = null;
+    clearTimeout(idleTimer);
     for (const { reject } of pending.values()) reject(new Error(error));
     pending.clear();
     for (const [jobId, job] of jobs) finishJob(jobId, { error });
@@ -39,6 +56,7 @@ function request(msg) {
 }
 
 function onHostMessage(msg) {
+  scheduleIdleDisconnect();
   if (msg.id && pending.has(msg.id)) {
     const { resolve, reject } = pending.get(msg.id);
     pending.delete(msg.id);

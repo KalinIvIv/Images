@@ -18,11 +18,21 @@ if not exist "%~dp0app\PhotoCut.exe" (
 )
 
 echo Installing PhotoCut to %DEST% ...
-if exist "%DEST%\app" rmdir /s /q "%DEST%\app"
-xcopy /e /i /q /y "%~dp0app" "%DEST%\app" >nul || goto :fail
-xcopy /e /i /q /y "%~dp0extension" "%DEST%\extension" >nul || goto :fail
 
-"%DEST%\app\PhotoCut.exe" install || goto :fail
+REM Chrome may still have the previous version running; Windows will not replace a running program.
+tasklist /fi "imagename eq PhotoCut.exe" 2>nul | find /i "PhotoCut.exe" >nul
+if not errorlevel 1 (
+    echo Closing the PhotoCut helper that Chrome is still running...
+    taskkill /im PhotoCut.exe /f >nul 2>&1
+    ping -n 3 127.0.0.1 >nul
+)
+
+if exist "%DEST%\app" rmdir /s /q "%DEST%\app"
+if exist "%DEST%\app" goto :locked
+xcopy /e /i /q /y "%~dp0app" "%DEST%\app" >nul || goto :copyfail
+xcopy /e /i /q /y "%~dp0extension" "%DEST%\extension" >nul || goto :copyfail
+
+"%DEST%\app\PhotoCut.exe" install || goto :regfail
 
 echo.
 echo ============================================================
@@ -41,8 +51,24 @@ explorer "%DEST%"
 pause
 exit /b 0
 
-:fail
+:locked
 echo.
-echo INSTALL FAILED - make sure Chrome is not saving images right now and try again.
+echo INSTALL FAILED - the old PhotoCut files are still in use.
+echo Close all Chrome windows (and Chrome in the system tray: right-click, Exit),
+echo or end "PhotoCut" in Task Manager (Ctrl+Shift+Esc), then run install.bat again.
+pause
+exit /b 1
+
+:copyfail
+echo.
+echo INSTALL FAILED - could not copy the files to %DEST%
+echo Check that the disk is not full and that no PhotoCut window or folder is open, then try again.
+pause
+exit /b 1
+
+:regfail
+echo.
+echo INSTALL FAILED - the files were copied, but registering PhotoCut with Chrome did not work.
+echo If antivirus blocked PhotoCut.exe, allow it and run install.bat again.
 pause
 exit /b 1
