@@ -163,12 +163,13 @@ class Host:
             return None
         with job.lock:
             job.pending += 1
-        self.pool.submit(self.process_one, msg['jobId'], job, index, base64.b64decode(msg['data']), msg.get('url', ''))
+        self.pool.submit(self.process_one, msg['jobId'], job, index, base64.b64decode(msg['data']),
+                         msg.get('url', ''), msg.get('trim', True))
         return None
 
-    def process_one(self, job_id, job, index, data, url):
+    def process_one(self, job_id, job, index, data, url, trim=True):
         try:
-            result = pipeline.process(data, job.settings)
+            result = pipeline.process(data, job.settings, trim=bool(trim))
             with job.lock:
                 job.results[index] = result
         except Exception as e:
@@ -210,7 +211,7 @@ class Host:
                 except FileExistsError:
                     continue
             saved.append({'file': path.name, 'size': info['final'], 'bytes': info['bytes'],
-                          'overLimit': info['over_limit']})
+                          'overLimit': info['over_limit'], 'trimmed': info['trimmed']})
 
         errors = [job.errors[i] for i in sorted(job.errors)]
         self.send({'type': 'job_done', 'jobId': job_id, 'folder': str(job.folder),

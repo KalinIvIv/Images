@@ -83,6 +83,12 @@ button.link { border: none; background: none; color: var(--accent); padding: 4px
   position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; border-radius: 50%;
   border: 2px solid #fff; background: rgba(17, 24, 39, .35); box-shadow: 0 0 2px rgba(0, 0, 0, .5);
 }
+.card .mode {
+  position: absolute; top: 4px; left: 4px; padding: 2px 6px; border-radius: 10px; border: none;
+  font-size: 10px; font-weight: 600; cursor: pointer; background: rgba(37, 99, 235, .9); color: #fff;
+}
+.card .mode.keep { background: rgba(55, 65, 81, .9); }
+.card .mode:hover { outline: 2px solid #fff; }
 .card.on { border-color: var(--accent); }
 .card.on .tick { background: var(--accent); }
 .card.on .tick::after { content: "✓"; color: #fff; font-size: 11px; position: absolute; inset: 0; text-align: center; line-height: 14px; }

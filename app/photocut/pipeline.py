@@ -141,11 +141,16 @@ def encode_png(img, settings=Settings()):
             return data, img  # best effort; caller reports the size
 
 
-def process(source, settings=Settings()):
-    """Full pipeline. Returns (png_bytes, info)."""
+def process(source, settings=Settings(), trim=True):
+    """
+    Full pipeline. Returns (png_bytes, info).
+    trim=False keeps the whole image (infographics, lifestyle photos): only the size
+    limits and PNG encoding are applied.
+    """
     img = load(source)
-    info = {'original': img.size}
-    img = auto_crop(img, settings)
+    info = {'original': img.size, 'trimmed': trim}
+    if trim:
+        img = auto_crop(img, settings)
     info['cropped'] = img.size
     img = scale_down_if_needed(img, settings.max_size)
     img = add_padding(img, settings.min_size)

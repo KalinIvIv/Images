@@ -80,6 +80,7 @@ def test_host_round_trip(tmp_path):
     done = h.until(lambda m: m.get('type') == 'job_done')
 
     assert [s['file'] for s in done['saved']] == ['Monitor 32GS95UV_1.png', 'Monitor 32GS95UV_2.png']
+    assert all(s['trimmed'] for s in done['saved'])
     assert len(done['errors']) == 2 and 'HTTP 403' in done['errors'][0]
     first = Image.open(base / 'Monitor 32GS95UV' / 'Monitor 32GS95UV_1.png').convert('RGB')
     r, g, _ = first.getpixel((first.width // 2, first.height // 2))
@@ -94,9 +95,11 @@ def test_host_round_trip(tmp_path):
 
     h.send({'id': 8, 'type': 'job_start', 'jobId': 'j3', 'folder': 'Monitor 32GS95UV', 'mode': 'new', 'total': 1})
     assert h.recv()['folder'].endswith('Monitor 32GS95UV (2)')
-    h.send({'type': 'job_image', 'jobId': 'j3', 'index': 0, 'data': jpeg('blue'), 'url': 'e'})
+    h.send({'type': 'job_image', 'jobId': 'j3', 'index': 0, 'data': jpeg('blue'), 'url': 'e', 'trim': False})
     h.send({'type': 'job_end', 'jobId': 'j3'})
-    assert h.until(lambda m: m.get('type') == 'job_done')['saved'][0]['file'] == 'Monitor 32GS95UV_1.png'
+    saved = h.until(lambda m: m.get('type') == 'job_done')['saved'][0]
+    assert saved['file'] == 'Monitor 32GS95UV_1.png'
+    assert saved['trimmed'] is False and saved['size'] == [900, 700]  # kept whole, not cropped
 
     h.send({'id': 9, 'type': 'nonsense'})
     assert h.recv() == {'id': 9, 'ok': False, 'error': 'Unknown request: nonsense'}

@@ -2,6 +2,8 @@
 // Owns the connection to the local app (native messaging) and runs save jobs,
 // so a job keeps going even if the popup is closed.
 
+importScripts('analyze.js');
+
 const HOST = 'com.photocut.host';
 const DOWNLOAD_CONCURRENCY = 6;
 const REFERER_RULE_ID = 1;
@@ -141,7 +143,7 @@ async function startJob({ tabId, pageUrl, folder, mode, images }) {
     const worker = async () => {
       while (next < images.length) {
         const index = next++;
-        const { url, fallback } = images[index];
+        const { url, fallback, trim = true } = images[index];
         let msg;
         try {
           msg = { data: await fetchImage(url) };
@@ -154,7 +156,7 @@ async function startJob({ tabId, pageUrl, folder, mode, images }) {
             msg = { error: e.message };
           }
         }
-        connect().postMessage({ type: 'job_image', jobId, index, url, ...msg });
+        connect().postMessage({ type: 'job_image', jobId, index, url, trim, ...msg });
         await updateJob(jobId, { downloaded: (job.state.downloaded || 0) + 1 });
       }
     };
@@ -173,6 +175,20 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
   if (msg.cmd === 'host') {
     reply(request(msg.req));
+    return true;
+  }
+  if (msg.cmd === 'analyze') {
+    // Trim / keep-whole suggestion per image, a few at a time.
+    const urls = msg.urls || [];
+    const results = new Array(urls.length);
+    let next = 0;
+    const worker = async () => {
+      while (next < urls.length) {
+        const i = next++;
+        try { results[i] = await analyzeImage(urls[i]); } catch (e) { results[i] = { trim: true, kind: 'unknown', reason: `Could not check this image (${e.message}), so it will be trimmed` }; }
+      }
+    };
+    reply(Promise.all(Array.from({ length: 6 }, worker)).then(() => ({ results })));
     return true;
   }
   if (msg.cmd === 'startJob') {

@@ -74,6 +74,38 @@ PICKER = """<!doctype html><html><head><title>Item 77</title></head><body>
 </div>
 <div class="zz"><img src="/img/unrelated_900x900.jpg" width="300"></div></body></html>"""
 
+def special(kind, w, h):
+    """Images for the trim / keep-whole check."""
+    from PIL import ImageFont
+    img = Image.new('RGB', (w, h), 'white')
+    d = ImageDraw.Draw(img)
+    if kind == 'infographic':          # product + feature callouts
+        d.rectangle((w // 12, h // 4, w * 5 // 12, h * 3 // 4), fill=(30, 60, 120))
+        font = ImageFont.load_default(size=max(12, h // 22))
+        for i, line in enumerate(['Ultra-clear 9H glass', 'Easy bubble-free install', 'Case friendly fit', 'Works with Face ID']):
+            d.text((w // 2, h // 5 + i * h // 7), line, fill=(40, 40, 40), font=font)
+    elif kind == 'lifestyle':          # product in a room: wall, floor, texture
+        d.rectangle((0, 0, w, h * 3 // 5), fill=(205, 190, 160))
+        d.rectangle((0, h * 3 // 5, w, h), fill=(110, 80, 55))
+        img = Image.blend(img, Image.effect_noise((w, h), 70).convert('RGB'), 0.25)
+        ImageDraw.Draw(img).rectangle((w // 3, h // 3, w * 2 // 3, h * 4 // 5), fill=(200, 30, 30))
+    elif kind == 'labelled':           # product with a printed brand name / label on it
+        d.rectangle((w // 4, h // 6, w * 3 // 4, h * 5 // 6), fill=(180, 20, 20))
+        font = ImageFont.load_default(size=max(12, h // 14))
+        d.text((w * 3 // 8, h // 2 - h // 20), 'BRAND', fill='white', font=font)
+    else:                              # plain product shot
+        d.ellipse((w // 4, h // 6, w * 3 // 4, h * 5 // 6), fill=(20, 120, 60))
+    buf = io.BytesIO()
+    img.save(buf, 'JPEG', quality=92)
+    return buf.getvalue(), 'image/jpeg'
+
+
+MIXED = """<!doctype html><html><head><title>Mixed 3</title></head><body>
+<div class="product-gallery">
+ <img src="/special/product_1200x1200.jpg" width="300"><img src="/special/labelled_1200x1200.jpg" width="300">
+ <img src="/special/infographic_1600x1200.jpg" width="300"><img src="/special/lifestyle_1600x1000.jpg" width="300">
+</div></body></html>"""
+
 # Gallery with only auto-generated class names (like many big-brand sites).
 HASHED = """<!doctype html><html><head><title>Hashed 5</title></head><body>
 <div class="css-a8f3k2"><img src="/img/hashed-banner_1600x900.jpg" width="1600" height="900" style="width:100%"></div>
@@ -122,6 +154,11 @@ class Handler(SimpleHTTPRequestHandler):
             return self.send(HASHED, 'text/html')
         if path == '/shop/bg-9':
             return self.send(BACKGROUND, 'text/html')
+        if path == '/shop/mixed-3':
+            return self.send(MIXED, 'text/html')
+        m = re.match(r'^/special/(\w+)_(\d+)x(\d+)\.jpg$', path)
+        if m:
+            return self.send(*special(m.group(1), int(m.group(2)), int(m.group(3))))
         if path.endswith('.css'):
             return self.send('', 'text/css')
         m = re.match(r'^/cdn/shop/files/([\w-]+?)(?:_\d+x\d*)?\.(jpg|png|webp)$', path)

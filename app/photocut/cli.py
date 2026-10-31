@@ -4,6 +4,7 @@ Command line, for setup and for use without Chrome:
   PhotoCut install | uninstall
   PhotoCut folder <input folder> <output folder name>       crop images already on disk
   PhotoCut urls <output folder name> <image url> [...]       download and crop
+  (add --no-trim to keep whole images: only resize, pad and save as PNG)
   PhotoCut config [key=value ...]                           show or change settings
 """
 
@@ -34,7 +35,7 @@ def download(url, referer=None, timeout=20):
     raise last
 
 
-def save_all(sources, folder_name, load):
+def save_all(sources, folder_name, load, trim=True):
     """Process sources in parallel, save as <name>_N.png in input order."""
     cfg = config.load()
     settings = pipeline.Settings(tolerance=int(cfg['tolerance']), flatten=bool(cfg['flatten']))
@@ -43,7 +44,7 @@ def save_all(sources, folder_name, load):
     folder, number = Path(status['path']), status['next']
 
     def work(src):
-        return pipeline.process(load(src), settings)
+        return pipeline.process(load(src), settings, trim=trim)
 
     with ThreadPoolExecutor() as pool:
         futures = [pool.submit(work, s) for s in sources]
@@ -69,10 +70,12 @@ def main(argv=None):
     f = sub.add_parser('folder')
     f.add_argument('input')
     f.add_argument('name')
+    f.add_argument('--no-trim', action='store_true', help='keep whole images (only resize and pad)')
     u = sub.add_parser('urls')
     u.add_argument('name')
     u.add_argument('urls', nargs='+')
     u.add_argument('--referer')
+    u.add_argument('--no-trim', action='store_true', help='keep whole images (only resize and pad)')
     c = sub.add_parser('config')
     c.add_argument('changes', nargs='*', metavar='key=value')
     args = p.parse_args(argv)
@@ -85,9 +88,9 @@ def main(argv=None):
         print('Unregistered.')
     elif args.cmd == 'folder':
         files = sorted(f for f in Path(args.input).iterdir() if f.suffix.lower() in IMAGE_EXTENSIONS)
-        print(f'Saved to {save_all(files, args.name, Path.read_bytes)}')
+        print(f'Saved to {save_all(files, args.name, Path.read_bytes, trim=not args.no_trim)}')
     elif args.cmd == 'urls':
-        print(f'Saved to {save_all(args.urls, args.name, lambda u: download(u, args.referer))}')
+        print(f'Saved to {save_all(args.urls, args.name, lambda u: download(u, args.referer), trim=not args.no_trim)}')
     elif args.cmd == 'config':
         changes = {}
         for item in args.changes:

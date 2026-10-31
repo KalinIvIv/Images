@@ -44,7 +44,7 @@ When anyone teaches PhotoCut a site, Google Drive syncs the file and everyone ge
    `<name>_1.png, <name>_2.png …`.
 
 What happens to every image:
-- The background is cropped away.
+- The background is cropped away. Images marked **▢ Whole** keep their layout (see "Trim or keep whole").
 - It's scaled down to fit 3000×3000 if larger.
 - It's padded with white up to 650×650 if smaller.
 - It's saved as a real PNG under 5 MB.
@@ -52,6 +52,18 @@ What happens to every image:
 Your originals on the website are never touched, and **existing files are never overwritten**.
 If the folder already has images, the new ones continue the numbering. Tick
 "Create a new folder instead" to get `<name> (2)`.
+
+## Trim or keep whole
+
+Each image has a small badge in its top-left corner:
+
+- **✂ Trim**: a product on a plain background. The background around it is cut away.
+- **▢ Whole**: an image with text or feature callouts, or a photo with a scene behind the product.
+  It is **not** cropped. It is only resized, padded and saved as a PNG, so its layout and text stay intact.
+
+PhotoCut sets the badges by itself when the popup opens. If one is wrong, click the badge to switch it.
+Clicking the badge doesn't untick the image. Hover over a badge to see why it was chosen.
+A white product box with printed text on it is sometimes taken for an infographic, so check those.
 
 ## When PhotoCut picks the wrong images (teaching a site)
 

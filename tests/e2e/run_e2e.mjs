@@ -223,6 +223,34 @@ print(json.dumps(res))`]);
     check(files.length === 11 && files.every(([, fmt, [w, h]]) => fmt === 'PNG' && Math.min(w, h) >= 650 && Math.max(w, h) <= 3000),
       `output: ${files.length} real PNGs within 650-3000 px`);
   }
+
+  // --- 5. Trim only product shots; keep infographics and scenes whole ------------------
+  {
+    const page = await context.newPage();
+    await page.goto(`${SITE}/shop/mixed-3`);
+    const popup = await openPopup(page);
+    await popup.waitForFunction(() => [...document.querySelectorAll('.card .mode')].every((b) => b.textContent !== '…'), null, { timeout: 15000 });
+    const modes = await popup.$$eval('.card', (els) => Object.fromEntries(els.map((c) => [c.title.split('\n')[0], c.querySelector('.mode').textContent])));
+    const expect = { 'product_1200x1200.jpg': '✂ Trim', 'labelled_1200x1200.jpg': '✂ Trim', 'infographic_1600x1200.jpg': '▢ Whole', 'lifestyle_1600x1000.jpg': '▢ Whole' };
+    for (const [file, mode] of Object.entries(expect)) check(modes[file] === mode, `trim check: ${file} → ${modes[file]}`);
+
+    // switching a badge by hand: keep the labelled product whole too; the badge click must not untick it
+    await popup.click('.card[title^="labelled_1200x1200.jpg"] .mode');
+    check(await popup.textContent('.card[title^="labelled_1200x1200.jpg"] .mode') === '▢ Whole' &&
+      await popup.$eval('.card[title^="labelled_1200x1200.jpg"]', (c) => c.classList.contains('on')), 'trim check: badge switches by click and image stays ticked');
+
+    await popup.fill('#folder', 'Mixed');
+    const r = await saveAndWait(popup);
+    check(/1 trimmed, 3 kept whole/.test(r.detail), `trim check: summary (${r.detail.split('·').pop().trim()})`);
+    const sizes = JSON.parse(py(['-c', `
+from PIL import Image; import glob, json
+print(json.dumps({f.split('/')[-1]: Image.open(f).size for f in sorted(glob.glob(r"${out}/Mixed/*.png"))}))`]));
+    check(JSON.stringify(sizes['Mixed_3.png']) === '[1600,1200]' && JSON.stringify(sizes['Mixed_4.png']) === '[1600,1000]' &&
+      JSON.stringify(sizes['Mixed_2.png']) === '[1200,1200]', `trim check: kept-whole images not cropped (${JSON.stringify(sizes)})`);
+    check(sizes['Mixed_1.png'][0] < 1200, `trim check: product shot trimmed (${sizes['Mixed_1.png']})`);
+    await popup.close();
+    await page.close();
+  }
 } finally {
   await context.close();
   server.kill();

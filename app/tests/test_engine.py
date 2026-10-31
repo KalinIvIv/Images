@@ -202,3 +202,21 @@ def test_bad_rules_file_raises(tmp_path):
     p.write_text('[1, 2]')
     with pytest.raises(ValueError):
         rules.load(p)
+
+
+# --- keep whole (no trim) -------------------------------------------------------
+
+def test_keep_whole_skips_crop_but_applies_limits():
+    big = product(size=4000, box=(1000, 1000, 1500, 1500))
+    _, info = pipeline.process(png_bytes(big, 'JPEG'), trim=False)
+    assert info['trimmed'] is False and info['cropped'] == (4000, 4000) and info['final'] == (3000, 3000)
+
+    small = product(size=400, box=(100, 100, 200, 200))
+    data, info = pipeline.process(png_bytes(small), trim=False)
+    assert info['final'] == (650, 650)
+    out = Image.open(io.BytesIO(data)).convert('RGB')
+    assert out.getpixel((125 + 150, 125 + 150)) == (255, 0, 0)  # original layout kept, centred
+
+
+def test_trim_is_default():
+    assert pipeline.process(png_bytes(product()))[1]['trimmed'] is True

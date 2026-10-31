@@ -163,6 +163,7 @@ function render() {
 
   update();
   checkFolder();
+  if (!state.analyzed) { state.analyzed = true; analyzeImages(); }
   folder.focus();
   folder.select();
 }
@@ -181,13 +182,46 @@ function card(img) {
   size.textContent = `${img.size ? `${img.size}px` : 'full size'} · ${img.file}`;
   const tick = document.createElement('div');
   tick.className = 'tick';
-  c.append(pic, size, tick);
+  const mode = document.createElement('button');
+  mode.className = 'mode';
+  img.modeEl = mode;
+  paintMode(img);
+  mode.onclick = (e) => {
+    e.stopPropagation();  // don't tick/untick the image
+    img.trim = img.trim === false;
+    img.reason = img.trim ? 'You chose to trim this image' : 'You chose to keep this image whole';
+    paintMode(img);
+  };
+  c.append(pic, size, tick, mode);
   c.onclick = () => {
     img.selected = !img.selected;
     c.classList.toggle('on', img.selected);
     update();
   };
   return c;
+}
+
+// The Trim / Keep whole badge. Before the check finishes, images are trimmed.
+function paintMode(img) {
+  const el = img.modeEl;
+  if (!el) return;
+  const trim = img.trim !== false;
+  el.textContent = img.trim === undefined ? '…' : trim ? '✂ Trim' : '▢ Whole';
+  el.classList.toggle('keep', !trim);
+  el.title = `${img.reason || 'Checking the image…'}\nClick to switch between "Trim" and "Keep whole".`;
+}
+
+// Ask the background worker which images are product shots (trim) and which have text or a scene (keep whole).
+async function analyzeImages() {
+  const images = state.result.images;
+  const res = await chrome.runtime.sendMessage({ cmd: 'analyze', urls: images.map((i) => i.thumb || i.url) }).catch(() => null);
+  images.forEach((img, i) => {
+    if (img.trim !== undefined && img.reason?.startsWith('You chose')) return;  // user already decided
+    const r = res?.results?.[i];
+    img.trim = r ? r.trim : true;
+    img.reason = r ? r.reason : 'Could not check this image, so it will be trimmed';
+    paintMode(img);
+  });
 }
 
 function selectedImages() {
@@ -267,7 +301,7 @@ async function save() {
     pageUrl: state.tab.url,
     folder,
     mode: $('new-folder').checked ? 'new' : 'add',
-    images: images.map((i) => ({ url: i.url, fallback: i.fallback })),
+    images: images.map((i) => ({ url: i.url, fallback: i.fallback, trim: i.trim !== false })),
   });
   if (!res?.ok) message(`Could not start: ${escapeHtml(res?.error || 'unknown error')}`, 'error');
 }
@@ -288,8 +322,9 @@ function showJob(job) {
   } else {
     const n = job.saved?.length || 0;
     const secs = ((Date.now() - job.started) / 1000).toFixed(1);
+    const whole = (job.saved || []).filter((f) => f.trimmed === false).length;
     $('job-title').textContent = `Saved ${n} image${n === 1 ? '' : 's'}`;
-    $('job-detail').textContent = `${job.folder}  ·  ${secs}s`;
+    $('job-detail').textContent = `${job.folder}  ·  ${secs}s${whole ? `  ·  ${n - whole} trimmed, ${whole} kept whole` : ''}`;
     $('job-errors').replaceChildren(...(job.errors || []).map((e) => {
       const li = document.createElement('li');
       li.textContent = e;

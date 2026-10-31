@@ -16,6 +16,8 @@ Chrome extension (extension/)                    Local app (app/photocut/, Photo
               highest-resolution URLs             pipeline.py  crop → scale ≤3000 → pad ≥650 → PNG ≤5MB
   picker.js   "Pick gallery area" overlay         rules.py     shared rules.json: safe merge + backup
   popup.js    folder name, image grid, save       naming.py    folder names, numbering, no overwrites
+  analyze.js  trim / keep-whole suggestion per
+              image (text callouts, scenes)
   background  downloads images (with the          config.py    %APPDATA%\PhotoCut\config.json
               browser's cookies) → streams        install.py   registers the host with Chrome (HKCU)
               them to the local app               cli.py       command line (folder / urls / config)
@@ -31,6 +33,13 @@ Chrome extension (extension/)                    Local app (app/photocut/, Photo
 
 Each image is upgraded to its largest version: `srcset`, zoom/large attributes, and Shopify,
 WordPress and Magento size suffixes are stripped. Duplicates at different sizes are merged.
+
+**Trim or keep whole:** when the popup opens, `analyze.js` checks a 480 px copy of each image
+in the background worker. If the border isn't a plain background, it's a scene or design and is kept
+whole. Rows of small, similar-height shapes mean text or feature callouts, so it's also kept whole.
+Anything else is a product shot and gets trimmed. Users can switch the badge per image. Kept-whole
+images skip the crop and only get resizing, padding and PNG encoding (`pipeline.process(trim=False)`;
+`--no-trim` on the command line).
 
 Rules are keyed by domain without `www.`, so a rule for `lg.com` covers every
 localisation. Built-in starter rules are in `extension/rules_builtin.json`; the shared file
