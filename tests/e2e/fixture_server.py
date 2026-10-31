@@ -74,6 +74,23 @@ PICKER = """<!doctype html><html><head><title>Item 77</title></head><body>
 </div>
 <div class="zz"><img src="/img/unrelated_900x900.jpg" width="300"></div></body></html>"""
 
+# Gallery with only auto-generated class names (like many big-brand sites).
+HASHED = """<!doctype html><html><head><title>Hashed 5</title></head><body>
+<div class="css-a8f3k2"><img src="/img/hashed-banner_1600x900.jpg" width="1600" height="900" style="width:100%"></div>
+<div class="sc-bdfBwQ" style="margin-top:900px">
+ <div><img src="/img/hashed-a_900x900.jpg" width="300"><img src="/img/hashed-b_900x900.jpg" width="300"></div>
+</div>
+<div class="sc-gsTCUz"><div><img src="/img/hashed-other_900x900.jpg" width="300"></div></div></body></html>"""
+
+# Gallery drawn with CSS background images from a stylesheet.
+BACKGROUND = """<!doctype html><html><head><title>Bg 9</title><style>
+.ph { display:inline-block; width:300px; height:300px; background-size:cover }
+.p1 { background-image:url(/img/bg-a_900x900.jpg) } .p2 { background-image:url(/img/bg-b_900x900.jpg) }
+</style></head><body>
+<div class="hero"><img src="/img/bg-banner_1600x900.jpg" width="1600" height="900" style="width:100%"></div>
+<section class="pdp" style="margin-top:900px"><span class="ph p1"></span><span class="ph p2"></span></section>
+</body></html>"""
+
 
 class Handler(SimpleHTTPRequestHandler):
     def log_message(self, *args):
@@ -86,7 +103,10 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_header('Content-Type', ctype)
         self.send_header('Content-Length', str(len(body)))
         self.end_headers()
-        self.wfile.write(body)
+        try:
+            self.wfile.write(body)
+        except (BrokenPipeError, ConnectionResetError):
+            pass  # the browser closed the page mid-download
 
     def do_GET(self):
         path = self.path.split('?')[0]
@@ -98,6 +118,10 @@ class Handler(SimpleHTTPRequestHandler):
             return self.send(LG, 'text/html')
         if path == '/shop/item-77':
             return self.send(PICKER, 'text/html')
+        if path == '/shop/hashed-5':
+            return self.send(HASHED, 'text/html')
+        if path == '/shop/bg-9':
+            return self.send(BACKGROUND, 'text/html')
         if path.endswith('.css'):
             return self.send('', 'text/css')
         m = re.match(r'^/cdn/shop/files/([\w-]+?)(?:_\d+x\d*)?\.(jpg|png|webp)$', path)

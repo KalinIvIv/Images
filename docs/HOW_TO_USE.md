@@ -59,11 +59,14 @@ If the folder already has images, the new ones continue the numbering. Tick
   **"Remember these choices for this site"** ticked when you save, and next time those
   images are skipped automatically for everyone.
 - **The product photos are missing, or random images were picked?** Click **Pick gallery area**:
-  1. Move the mouse over the product photos on the page. A blue box shows what will be chosen.
-  2. Scroll up or press ↑ to make the box bigger (the parent area), and scroll down or press ↓ to make it smaller.
-     Aim for the box that holds the main photo **and** its thumbnails.
-  3. Click. Then click the PhotoCut icon again (it may open by itself).
-  4. Check the images and press Save, with "Remember" ticked.
+  1. Move the mouse over the product photos on the page. A blue box shows the area under the mouse,
+     with a label saying how many images are inside it.
+  2. **Click** to lock that area. A bar appears at the bottom of the page.
+  3. Use **+ Bigger** / **− Smaller** (or the ↑ / ↓ keys) until the box covers the main photo
+     **and** its thumbnails, and the label shows the right number of images.
+     Clicking somewhere else on the page starts again from there.
+  4. Click **Use this area** (or press Enter). Then click the PhotoCut icon again if it doesn't open by itself.
+  5. Check the images and press Save, with "Remember" ticked.
 
 From then on, PhotoCut uses that area on every product page of that site, for the whole team.
 A rule for `lg.com` covers all LG countries (`/za/`, `/uk/`, `/de/` …) as long as the pages

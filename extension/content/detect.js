@@ -116,9 +116,24 @@
     return url ? { url, thumb: url, size: Math.max(el.clientWidth, el.clientHeight), alt: '' } : null;
   }
 
-  function imagesIn(root) {
+  function fromComputedBackground(el) {
+    const m = getComputedStyle(el).backgroundImage.match(/url\(\s*['"]?([^'")]+)/);
+    const url = m && abs(m[1]);
+    return url ? { url, thumb: url, size: Math.max(el.clientWidth, el.clientHeight), alt: '' } : null;
+  }
+
+  // deep: also read CSS background images set by stylesheets (slower; used for the gallery area).
+  function imagesIn(root, deep = false) {
     const out = [];
-    for (const img of root.querySelectorAll('img')) {
+    if (deep) {
+      for (const el of [root, ...root.querySelectorAll('*')].slice(0, 1500)) {
+        if (el.tagName === 'IMG') continue;
+        const c = fromComputedBackground(el);
+        if (c) out.push({ ...c, el });
+      }
+    }
+    // The picked area may be a single image itself.
+    for (const img of root.tagName === 'IMG' ? [root] : root.querySelectorAll('img')) {
       const c = fromImg(img);
       if (c) out.push({ ...c, el: img });
     }
@@ -260,8 +275,12 @@
     if (shopify?.images.length && gallery.how !== 'rule') {
       shopify.images.forEach((c) => add({ ...c, thumb: c.url.replace(/(\.\w+)(\?|$)/, '_400x$1$2') }, { gallery: true, source: 'shopify' }));
     }
+    let galleryCount = 0;
     for (const el of gallery.els) {
-      for (const c of imagesIn(el)) add(c, { gallery: true, source: 'gallery' });
+      for (const c of imagesIn(el, true)) { add(c, { gallery: true, source: 'gallery' }); galleryCount++; }
+    }
+    if (gallery.how === 'rule' && !galleryCount) {
+      warnings.push('The gallery area has no images PhotoCut can read. Use "Pick gallery area" again and widen the box (scroll up) until it says how many images are inside.');
     }
     ldImages(products).forEach((url) => add({ url, thumb: url, size: 0 }, { gallery: false, source: 'structured' }));
     const og = abs(document.querySelector('meta[property="og:image"]')?.content);

@@ -129,15 +129,14 @@ try {
     await page.locator('.a1').scrollIntoViewIfNeeded();
     const box = await page.locator('.a1').boundingBox();
     await page.mouse.move(box.x + 20, box.y + 20);
-    await page.mouse.move(box.x + 30, box.y + 30);
-    await page.mouse.wheel(0, -100);  // widen from the <img> to its container
-    await page.mouse.click(box.x + 30, box.y + 30);
+    await page.mouse.click(box.x + 30, box.y + 30);   // locks the image under the mouse
+    await page.click('[data-act="bigger"]');           // widen from the <img> to its container
+    await page.click('[data-act="use"]');
     await page.waitForTimeout(300);
     await popup.close();
 
     popup = await openPopup(page);
     c = await cards(popup);
-    console.log(`      rule status: ${await popup.textContent('#rule-status')}`);
     const on = c.filter((x) => x.on).map((x) => x.title.split('\n')[0]);
     check(JSON.stringify(on) === JSON.stringify(['item77-a_900x900.jpg', 'item77-b_900x900.jpg']), `picker: picked area used (${on})`);
     check(await popup.isVisible('#remember-wrap'), 'picker: offers to remember the rule');
@@ -157,6 +156,48 @@ try {
       'picker: rule applied on next visit');
     check(/Team rule/.test(await popup.textContent('#rule-status')), 'picker: popup says a team rule is in use');
     await popup.close();
+    await page.close();
+  }
+
+  // --- 3b. Picker on hard pages: auto-generated class names, CSS background images ---
+  async function pickArea(page, selector, widen, how = 'buttons') {
+    const popup = await openPopup(page);
+    await popup.evaluate(() => { window.close = () => {}; });
+    await popup.click('#pick');
+    await page.bringToFront();
+    await page.waitForFunction(() => document.body.parentElement.innerText.includes('PhotoCut: click the product gallery'));
+    await page.locator(selector).first().scrollIntoViewIfNeeded();
+    const box = await page.locator(selector).first().boundingBox();
+    await page.mouse.move(box.x + 10, box.y + 10);
+    await page.mouse.click(box.x + 12, box.y + 12);
+    for (let i = 0; i < widen; i++) {
+      if (how === 'keys') await page.keyboard.press('ArrowUp');
+      else await page.click('[data-act="bigger"]');
+    }
+    if (how === 'keys') await page.keyboard.press('Enter');
+    else await page.click('[data-act="use"]');
+    await page.waitForTimeout(300);
+    await popup.close();
+    const after = await openPopup(page);
+    const on = (await cards(after)).filter((x) => x.on).map((x) => x.title.split('\n')[0]);
+    const status = await after.textContent('#rule-status');
+    await after.close();
+    return { on, status };
+  }
+  for (const [url, target, widen, expected, how] of [
+    ['/shop/hashed-5', '.sc-bdfBwQ img', 2, ['hashed-a_900x900.jpg', 'hashed-b_900x900.jpg'], 'keys'],
+    ['/shop/bg-9', '.pdp .p1', 1, ['bg-a_900x900.jpg', 'bg-b_900x900.jpg'], 'buttons'],
+    ['/shop/hashed-5', '.sc-bdfBwQ img', 0, ['hashed-a_900x900.jpg'], 'buttons'],
+  ]) {
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto(`${SITE}${url}`);
+    const { on, status } = await pickArea(page, target, widen, how);
+    check(JSON.stringify(on) === JSON.stringify(expected), `picker on ${url} (${how}, bigger ${widen}x): exactly the picked area is selected (${on})`);
+    if (JSON.stringify(on) !== JSON.stringify(expected)) console.log(`      status: ${status}`);
+    // picking a different area changes the selection
+    const again = await pickArea(page, url.includes('hashed') ? '.sc-gsTCUz img' : '.hero img', 1);
+    check(JSON.stringify(again.on) !== JSON.stringify(on) && again.on.length > 0, `picker on ${url}: picking another area changes the selection (${again.on})`);
     await page.close();
   }
 
